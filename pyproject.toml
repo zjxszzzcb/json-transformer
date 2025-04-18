@@ -1,0 +1,13 @@
+[build-system]
+requires = ["flit_core >=3.11,<4"]
+build-backend = "flit_core.buildapi"
+
+[project]
+name = "json_transformer"
+version = "0.0.1"
+description = "zast api"
+
+dependencies = []
+
+[project.scripts]
+transjson = "json_transformer.transform:main"
