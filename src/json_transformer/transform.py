@@ -88,6 +88,32 @@ class TransformDict(dict):
                 results.append(value.to_json_obj() if isinstance(value, TransformDict) else value)
             return results
 
+
+def get_method_body(code: str, method_name: str):
+    import ast
+    # 解析AST
+    parsed = ast.parse(code)
+
+    # 寻找指定函数定义
+    for node in ast.walk(parsed):
+        if isinstance(node, ast.FunctionDef) and node.name == method_name:
+            # 获取函数体源代码的行范围
+            start_line = node.body[0].lineno
+            end_line = node.body[-1].lineno
+
+            # 从原始代码字符串中提取函数体
+            code_lines = code.splitlines()
+            body_lines = code_lines[start_line-1:end_line+1]
+
+            # 处理缩进
+            min_indent = min(len(line) - len(line.lstrip()) for line in body_lines if line.strip())
+            body = "\n".join(line[min_indent:] for line in body_lines)
+
+            return body
+
+    return ""
+
+
 def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("from_file", type=str)
@@ -98,16 +124,23 @@ def parse_args():
     arguments = parser.parse_args()
     if arguments.code_file:
         with open(arguments.code_file, encoding='utf-8') as f:
-            arguments.transformers = f.readlines()
+            code = f.read()
+        transform_block = get_method_body(code, "transform")
+        if transform_block:
+            arguments.transformers = [f"{code}\n{transform_block}"]
+        else:
+            # TODO: parse for loop and if expression
+            arguments.transformers = code.splitlines()
+
     return arguments
 
 def transform_json(src: dict, transformers: List[str]) -> Dict:
     src = TransformDict(**src)
     dst = TransformDict()
     for transformer in transformers:
-        dst.messages[0] = src.observations[0].input[0]
-        exec(transformer)
+        exec(transformer, {}, {'src': src, 'dst': dst})
     return dst.to_json_obj()
+
 
 def transform_json_list(source_json_list: List[Dict], transformers: List[str]) -> List[Dict]:
     transform_results = []
@@ -118,6 +151,7 @@ def transform_json_list(source_json_list: List[Dict], transformers: List[str]) -
         except Exception:
             continue
     return transform_results
+
 
 def load_json_obj(file_or_dir_path: str):
     if os.path.isfile(file_or_dir_path):

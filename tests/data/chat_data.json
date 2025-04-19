@@ -1,0 +1,42 @@
+[
+  {
+    "id": "1391d66e-b4d8-46a2-a431-9820cb961db0",
+    "metadata": {
+      "run_name": "NetIOVerifier",
+      "vul_info": {
+        "index": 369,
+        "rule": "java/ssrf",
+        "api_path": ""
+      }
+    },
+    "url": "",
+    "tags": [],
+    "observations": [
+      {
+        "id": "60600140-360a-4705-ad20-65f78005aae4",
+        "metadata": {
+          "ls_provider": "openai",
+          "ls_model_name": "gpt-4",
+          "ls_model_type": "chat",
+          "ls_temperature": null,
+          "ls_max_tokens": 2048
+        },
+        "input": [
+          {
+            "role": "user",
+            "content": "hello?"
+          }
+        ],
+        "output": {
+          "role": "assistant",
+          "content": "Hi!",
+          "additional_kwargs": {
+            "refusal": null
+          }
+        },
+        "type": "GENERATION",
+        "trace_id": "1391d66e-b4d8-46a2-a431-9820cb961db0"
+      }
+    ]
+  }
+]
